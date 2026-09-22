@@ -6,7 +6,12 @@ export function groupMemories(filtered: Memory[]) {
   const core = filtered.filter(
     (m) => m.tier === "core" && m.status === "active",
   );
-  const projects = filtered.filter((m) => m.scope_type === "project");
+  // Projects is the active working set, so retired memories belong to the
+  // archive tab only. Without the status filter an archived or superseded
+  // memory was counted here as well, inflating the per-project badge.
+  const projects = filtered.filter(
+    (m) => m.scope_type === "project" && m.status === "active",
+  );
   const recent = [...filtered].sort((a, b) =>
     b.updated_at.localeCompare(a.updated_at),
   );
