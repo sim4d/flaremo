@@ -148,7 +148,12 @@ class CloudflareVectorIndex implements VectorIndex {
   async query(vector: number[], topK: number, namespace?: string) {
     const result = await this.index.query(vector, {
       topK,
-      returnMetadata: false,
+      // Vectorize rejects the boolean form at runtime with error 40026
+      // ("returnMetadata: expected value"), even though the published types
+      // declare `boolean | "all" | "indexed" | "none"`. Passing `false` made
+      // every query fail and silently degrade recall to FTS5. Use the string
+      // form, which is what the API actually accepts.
+      returnMetadata: "none",
       // `namespace` is a first-class Vectorize query option; routing it
       // through `filter` would match it against vector metadata instead.
       ...(namespace ? { namespace } : {}),
