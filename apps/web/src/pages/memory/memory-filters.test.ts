@@ -63,17 +63,24 @@ describe("groupMemories", () => {
     expect(core.map((m) => m.id)).toEqual(["memories/core"]);
   });
 
-  it("sorts recent by updated_at descending across all scopes", () => {
-    const { recent } = groupMemories([
-      memory({ id: "memories/old", updated_at: "2026-09-01T00:00:00.000Z" }),
+  it("only admits active memories to the active and observed pills", () => {
+    const { active, observed } = groupMemories([
+      memory({ id: "memories/observed", verification: "observed" }),
       memory({
-        id: "memories/new",
-        scope_type: "global",
-        scope_key: null,
-        updated_at: "2026-09-22T00:00:00.000Z",
+        id: "memories/inferred",
+        verification: "inferred",
+      }),
+      memory({
+        id: "memories/archived",
+        verification: "observed",
+        status: "archived",
       }),
     ]);
 
-    expect(recent.map((m) => m.id)).toEqual(["memories/new", "memories/old"]);
+    expect(active.map((m) => m.id).sort()).toEqual([
+      "memories/inferred",
+      "memories/observed",
+    ]);
+    expect(observed.map((m) => m.id)).toEqual(["memories/observed"]);
   });
 });
